@@ -1,0 +1,11 @@
+langgraph
+langchain
+langchain-google-genai
+langchain-huggingface
+langchain-community
+huggingface_hub
+pydantic
+google-genai
+python-dotenv
+docker
+streamlit
