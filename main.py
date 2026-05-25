@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.core.graph import app
+from src.core.graph import app, get_initial_state
 
 PIPELINE_CONFIG = {"recursion_limit": 50}
 
@@ -18,19 +18,7 @@ DEFAULT_PROMPT = (
 def main():
     print("🚀 Initializing Devin's Younger Brother...\n" + "-" * 40)
 
-    initial_state = {
-        "user_prompt": DEFAULT_PROMPT,
-        "planner_suggestion": "",
-        "code_buffer": "",
-        "terminal_output": "",
-        "detected_errors": [],
-        "is_verified": False,
-        "repair_attempts": 0,
-        "last_code_buffer": "",
-        "pipeline_logs": [],
-        "llm_provider": "gemini",
-        "used_hf_failover": False,
-    }
+    initial_state = get_initial_state(DEFAULT_PROMPT)
 
     print(f"👤 User Prompt: {initial_state['user_prompt']}")
     print(f"⚙️  recursion_limit: {PIPELINE_CONFIG['recursion_limit']}")
@@ -53,7 +41,9 @@ def main():
         print(f"Terminal Output: {state_dict.get('terminal_output')}")
         print(f"Detected Errors: {state_dict.get('detected_errors')}")
         print(f"Repair Attempts: {state_dict.get('repair_attempts', 0)}")
+        print(f"Intent:          {state_dict.get('intent')}")
         print(f"Is Verified:     {state_dict.get('is_verified')}\n")
+        print(f"History turns:   {len(state_dict.get('conversation_history') or [])}\n")
 
         print("====== 💻 GENERATED CODE BUFFER 💻 ======")
         code_buffer = state_dict.get("code_buffer", "")

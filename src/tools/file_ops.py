@@ -1,16 +1,24 @@
 import os
 import tempfile
 
+
+def sandbox_workspace_dir() -> str:
+    """Workspace for generated scripts; override via DYB_SANDBOX_DIR for containers."""
+    override = os.getenv("DYB_SANDBOX_DIR", "").strip()
+    if override:
+        workspace_dir = os.path.abspath(override)
+    else:
+        workspace_dir = os.path.join(tempfile.gettempdir(), "devin_brother_sandbox")
+    os.makedirs(workspace_dir, exist_ok=True)
+    return workspace_dir
+
+
 def write_code_to_disk(filename: str, code: str) -> str:
     """
     Writes the provided code to a specified filename inside a temporary directory.
     Returns the absolute path to the saved file.
     """
-    # Create a temporary directory or use a dedicated one
-    temp_dir = tempfile.gettempdir()
-    # Create a 'devin_brother_sandbox' folder if we want to be organized
-    workspace_dir = os.path.join(temp_dir, "devin_brother_sandbox")
-    os.makedirs(workspace_dir, exist_ok=True)
+    workspace_dir = sandbox_workspace_dir()
     
     file_path = os.path.join(workspace_dir, filename)
     with open(file_path, "w", encoding="utf-8") as f:
@@ -26,8 +34,7 @@ def execute_python_code(filename: str) -> dict:
     Executes a python file inside an ephemeral Docker container for sandbox isolation.
     Returns a dict with stdout, stderr, and returncode.
     """
-    temp_dir = tempfile.gettempdir()
-    workspace_dir = os.path.join(temp_dir, "devin_brother_sandbox")
+    workspace_dir = sandbox_workspace_dir()
     file_path = os.path.join(workspace_dir, filename)
     
     if not os.path.exists(file_path):

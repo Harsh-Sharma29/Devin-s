@@ -1,0 +1,24 @@
+services:
+  devin-brother:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devin-younger-brother
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    env_file:
+      - .env
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      HUGGINGFACEHUB_API_TOKEN: ${HUGGINGFACEHUB_API_TOKEN:-}
+      DYB_SANDBOX_DIR: /tmp/devin_brother_sandbox
+    volumes:
+      - dyb_sandbox:/tmp/devin_brother_sandbox
+    # Mount host Docker socket only when running real LangGraph sandbox from the container:
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+volumes:
+  dyb_sandbox:

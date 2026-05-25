@@ -1,11 +1,14 @@
 import os
 import json
+import logging
 from dataclasses import dataclass
 from typing import Tuple, Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_community.chat_models import ChatHuggingFace
 from langchain_core.messages import HumanMessage, SystemMessage
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class LLMResult:
@@ -35,11 +38,11 @@ def call_agent_llm(system_prompt: str, user_message: str) -> LLMResult:
 		error_str = str(e)
 		# Checking for any variation of quota limits or service exhaustion
 		if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "503" in error_str:
-			print("⚠️ Gemini Quota Exceeded! Switching to ChatHuggingFace Fallback Layer...")
+			logger.warning("[LLM Fallback] Gemini quota exceeded — switching to ChatHuggingFace fallback layer")
 			
 			hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 			if not hf_token:
-				print("❌ Critical: HUGGINGFACEHUB_API_TOKEN is missing in .env!")
+				logger.error("[LLM Fallback] HUGGINGFACEHUB_API_TOKEN is missing in .env")
 				raise e
 			
 			# 2. Secondary Engine: Llama-3-8B wrapped cleanly using text-generation task to avoid validation clash
